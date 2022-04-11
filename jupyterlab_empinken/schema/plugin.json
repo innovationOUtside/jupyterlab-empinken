@@ -8,55 +8,55 @@
       "type": "string",
       "title": "Tag prefix",
       "description": "Prefix to identify tag2class tags",
-      "default": "iou-"
+      "default": "style-"
     },
     "activity_button": {
       "type": "boolean",
       "title": "Activity button",
       "description": "Whether to display the \"Activity [A]\" button",
-      "default": false
+      "default": true
     },
     "solution_button": {
       "type": "boolean",
       "title": "Solution button",
       "description": "Whether to display the \"Solution [S]\" button",
-      "default": false
+      "default": true
     },
     "learner_button": {
       "type": "boolean",
       "title": "Learner button",
       "description": "Whether to display the \"Learner [L]\" button",
-      "default": false
+      "default": true
     },
     "tutor_button": {
       "type": "boolean",
       "title": "Tutor button",
       "description": "Whether to display the \"Tutor [T]\" button",
-      "default": false
+      "default": true
     },
     "activity_render": {
       "type": "boolean",
       "title": "Activity render",
       "description": "Whether to render the \"Activity [A]\" background",
-      "default": false
+      "default": true
     },
     "solution_render": {
       "type": "boolean",
       "title": "Solution render",
       "description": "Whether to render the \"Solution [S]\" background",
-      "default": false
+      "default": true
     },
     "learner_render": {
       "type": "boolean",
       "title": "Learner render",
       "description": "Whether to render the \"Learner [L]\" background",
-      "default": false
+      "default": true
     },
     "tutor_render": {
       "type": "boolean",
       "title": "Tutor render",
       "description": "Whether to render the \"Tutor [T]\" background",
-      "default": false
+      "default": true
     },
     "activity_color": {
       "type": "string",
@@ -98,13 +98,13 @@
       "type": "string",
       "title": "Learner tag name",
       "description": "Tag body (ex- of prefix) to identify learner",
-      "default": "learner"
+      "default": "student"
     },
     "tutor_tag": {
       "type": "string",
       "title": "Tutor tag name",
       "description": "Tag body (ex- of prefix) to identify tutor",
-      "default": "tutor"
+      "default": "commentate"
     }
   },
   "additionalProperties": false

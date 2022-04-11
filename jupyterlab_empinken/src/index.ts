@@ -93,8 +93,10 @@ export class ButtonExtension
     // and render each background
     let typ: keyof typeof tagButtonSpec;
     for (typ in tagButtonSpec) {
-      tagButtonSpec[typ]['enabled'] = this.settings.get(typ.toString() +'_button').composite;
-      tagButtonSpec[typ]['render'] = this.settings.get(typ.toString() +'_render').composite;
+      const typ_ = typ.toString();
+      tagButtonSpec[typ_]['enabled'] = this.settings.get(typ_ +'_button').composite;
+      tagButtonSpec[typ_]['render'] = this.settings.get(typ_ +'_render').composite;
+      tagButtonSpec[typ_]['tag'] = this.settings.get(typ_ +'_tag').composite.toString();
     }
     
     const toggleTagButtonAction = (typ) => {
@@ -138,16 +140,17 @@ export class ButtonExtension
         */
          
         // Set the tag name
-        const tagname = tag_prefix + typ
-        
+        const mappedtagname = tag_prefix + tagButtonSpec[typ]['tag'];
+        // Use the abstract class name and the structure defined in the CSS file
+        const tagname = 'iou-' + typ.toString();
         // If the tag exists...
         // Should we also take the opportunity to add
         // corresponding class tags here?
-        if (tagList.includes(tagname)) {
-            console.log("I see "+tagname)
+        if (tagList.includes(mappedtagname)) {
+            console.log("I see "+mappedtagname)
  
             // ...then remove it
-            const index = tagList.indexOf(tagname, 0);
+            const index = tagList.indexOf(mappedtagname, 0);
             if (index > -1) {
                tagList.splice(index, 1);
             }
@@ -157,8 +160,8 @@ export class ButtonExtension
         }
         // ...else add it
         else {
-            console.log("I don't see " + tagname)
-            tagList.push(tagname)
+            console.log("I don't see " + mappedtagname)
+            tagList.push(mappedtagname)
              
             // Add class
             activeCell.node.classList.add(tagname + "-node")
@@ -169,22 +172,24 @@ export class ButtonExtension
          
     };
 
-     
+    
     // Add a button for each element in the array
 
     for (typ in tagButtonSpec) {
-        if (!tagButtonSpec[typ]['enabled'])
+      // We can't have these things wandering
+      const typ_ = typ.toString();
+        if (!tagButtonSpec[typ_]['enabled'])
             continue;
         // Create the button
-        tagButtonSpec[typ]['button'] = new ToolbarButton({
-            className: 'tagger-' + typ.toString() + '-button',
-            label: tagButtonSpec[typ]['label'],
-            onClick: () => toggleTagButtonAction(typ),
-            tooltip: 'Toggle ' + tag_prefix + typ.toString() + ' metadata tag on a cell',
+        tagButtonSpec[typ_]['button'] = new ToolbarButton({
+            className: 'tagger-' + typ_ + '-button',
+            label: tagButtonSpec[typ_]['label'],
+            onClick: () => toggleTagButtonAction(typ_),
+            tooltip: 'Toggle ' + tag_prefix + typ_ + ' metadata tag on a cell',
         })
          
         // Add the button to the toolbar
-        panel.toolbar.insertItem(tagButtonSpec[typ]['location'], 'toggle_' + typ.toString() + 'TagButtonAction', tagButtonSpec[typ]['button']);
+        panel.toolbar.insertItem(tagButtonSpec[typ_]['location'], 'toggle_' + typ_ + 'TagButtonAction', tagButtonSpec[typ_]['button']);
     }
      
     return new DisposableDelegate(() => {
@@ -252,10 +257,16 @@ export class ClassDemoExtension
     // Create an array to hold button definitions
     var tagButtonSpec = new Array();
 
+    // Also set up a map from settings enabled tag name to abstract tag name
+    var tag2abstractTag = new Map<string, string>();
+
     for (let typ of tag_types) {
       console.log("Setup on "+typ);
       tagButtonSpec[typ] = new Array();
       tagButtonSpec[typ]['render'] = this.settings.get(typ+'_render').composite;
+      tagButtonSpec[typ]['tag'] = this.settings.get(typ.toString() +'_tag').composite.toString();
+      // Also set up a map
+      tag2abstractTag.set(tagButtonSpec[typ]['tag'], typ);
     }
        
     console.log("Tag prefix is " + tag_prefix);
@@ -272,19 +283,27 @@ export class ClassDemoExtension
         console.log("Checking to see if there are class tags to set on...")
         for (const cell of notebook.widgets) {
             let tagList = cell.model.metadata.get('tags') as string[];
+            // Do we have any tags?
             if (tagList) {
+              // Iterate through the tags
               for (let i = 0; i < tagList.length; i++) {
-                var tag = tagList[i];
+                const tag = tagList[i];
                 console.log("I see tag " + tag + '(tag_prefix is ' + tag_prefix + ')' + tag.startsWith(tag_prefix));
-                if (tag.startsWith(tag_prefix)) {
+                if ((tag_prefix=='') || tag.startsWith(tag_prefix)) {
                   const typ = tag.replace(tag_prefix, '');
+                  var abstract_tag = '';
+                  if (tag2abstractTag.has(typ))
+                    abstract_tag = tag2abstractTag.get(typ);
                   console.log("Tag match on prefix; typ is " + typ );
                   console.log("Acceptable type? " +  tag_types.includes(typ));
                   console.log("Renderable type? " +  tagButtonSpec[typ]['render']);
-                  if (tag_types.includes(typ) && (tagButtonSpec[typ]['render'])) {
-                    console.log("Classing tag " + tag);
+                  //if (tag_types.includes(typ) && (tagButtonSpec[typ]['render'])) {
+                  if (abstract_tag && (tagButtonSpec[abstract_tag]['render'])) {
+                    console.log("Classing tag " + tag +'/' + abstract_tag);
                     // class the cell
-                    cell.node.classList.add(tag + "-node");
+                    //cell.node.classList.add(tag + "-node");
+                    // The iou-class is the one used in css
+                    cell.node.classList.add('iou-' + abstract_tag + "-node");
                   }
                 } // end: if tag starts with prefix...
               } // end: tags iterator
@@ -348,11 +367,10 @@ function activate(
           // The document object seems to be magically available?
           const root = document.documentElement;
           const updateSettings = (): void => {
-            const tag_prefix =  settings.get('tagprefix').composite.toString();
             let tag_types: string[] = ['activity', 'solution', 'learner', 'tutor'];
             for (let typ of tag_types) {
               const color = settings.get(typ+'_color').composite as string;
-              root.style.setProperty('--'+tag_prefix+typ+'-bg-color', color);
+              root.style.setProperty('--iou-'+typ+'-bg-color', color);
             }
           };
           updateSettings();
