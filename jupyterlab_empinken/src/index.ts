@@ -296,7 +296,7 @@ export class ClassDemoExtension
                     abstract_tag = tag2abstractTag.get(typ);
                   console.log("Tag match on prefix; typ is " + typ );
                   console.log("Acceptable type? " +  tag_types.includes(typ));
-                  console.log("Renderable type? " +  tagButtonSpec[typ]['render']);
+                  //console.log("Renderable type? " +  tagButtonSpec[typ]['render']);
                   //if (tag_types.includes(typ) && (tagButtonSpec[typ]['render'])) {
                   if (abstract_tag && (tagButtonSpec[abstract_tag]['render'])) {
                     console.log("Classing tag " + tag +'/' + abstract_tag);
